@@ -4,28 +4,33 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 
-from services import filter_table, send_goods, set_table_type
+from services import filter_table, send_goods, set_table_type, searching_keyboard, validate_goods_text, \
+    process_goods_changing, change_goods_count
 
 
-bot = Bot(token="5433136845:AAH6KqJ9kiDeDoNzDSLdHpnAyqHUINqKDaQ")
+bot = Bot(token="5402135297:AAHiKc64WL9GaQKT4JJh_zO17tfJKZ7nojg")
 dp = Dispatcher(bot)
-
 
 
 @dp.message_handler(commands="start")
 async def start(message: types.Message):
+    await searching_keyboard(message)
 
-    kb = [
-        [types.KeyboardButton(text="ВЕТРОВИКИ", )],
-        [types.KeyboardButton(text="ОТБОЙНИКИ")],
-        [types.KeyboardButton(text="РЕСНИЧКИ")],
-        [types.KeyboardButton(text="НАКЛАДКИ НА БАМПЕР")],
-        [types.KeyboardButton(text="СПОЙЛЕРЫ НА КРЫШКУ БАГАЖНИКА")],
-        [types.KeyboardButton(text="КОЗЫРЬКИ ЗАДНЕГО СТЕКЛА")],
 
-    ]
-    keyboard = types.ReplyKeyboardMarkup(keyboard=kb)
-    await message.answer("Что ищем?", reply_markup=keyboard)
+@dp.message_handler(text="ВЕРНУТЬСЯ К ПОИСКУ ТОВАРОВ")
+async def start(message: types.Message):
+    await searching_keyboard(message)
+
+
+@dp.message_handler(text="УМЕНЬШИТЬ КОЛИЧЕСТВО: -1")
+async def change_goods(message: types.Message):
+    await change_goods_count(message, -1)
+
+
+@dp.message_handler(text="ПОПОЛНИТЬ: +1")
+async def change_goods(message: types.Message):
+    await change_goods_count(message, 1)
+
 
 @dp.message_handler(text="ВЕТРОВИКИ")
 async def search_goods(message: types.Message):
@@ -66,9 +71,13 @@ async def search_goods(message: types.Message):
 
 @dp.message_handler(content_types=['text'])
 async def search_goods(message: types.Message):
-    good_name = message.text
+    is_goods_text, table_name, goods_id = validate_goods_text(message.text)
 
-    await send_goods(message, good_name)
+    if is_goods_text:
+        await process_goods_changing(message, table_name, goods_id)
+    else:
+        good_name = message.text
+        await send_goods(message, good_name)
 
 if __name__ == '__main__':
     executor.start_polling(dp)
