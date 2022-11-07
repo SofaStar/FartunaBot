@@ -8,7 +8,7 @@ from services import filter_table, send_goods, set_table_type, searching_keyboar
     process_goods_changing, change_goods_count
 
 
-bot = Bot(token="5402135297:AAHiKc64WL9GaQKT4JJh_zO17tfJKZ7nojg")
+bot = Bot(token="5433136845:AAH6KqJ9kiDeDoNzDSLdHpnAyqHUINqKDaQ")
 dp = Dispatcher(bot)
 
 
